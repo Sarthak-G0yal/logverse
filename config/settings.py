@@ -11,24 +11,28 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+import sys
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%s78i197$4hk@-c$2w_4%^ht__povi2r+346q$bo+9%rwpk*d0'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'insecure-secret-key-for-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+# Allow all hosts during development, can be restricted in production
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# MongoDB Connection Settings
+MONGO_HOST = os.getenv('MONGO_HOST', 'host.docker.internal')
+MONGO_PORT = os.getenv('MONGO_PORT', '27017')
+MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'logverse_db')
+MONGO_USER = os.getenv('MONGO_USER', '')
+MONGO_PASSWORD = os.getenv('MONGO_PASSWORD', '')
 # Application definition
+
+MONGO_URI = f"mongodb://{MONGO_HOST}:{MONGO_PORT}/"
+print(f"🚀 [DEBUG] DJANGO ATTEMPTING MONGO CONNECTION TO: {MONGO_URI}", file=sys.stderr, flush=True)
 
 INSTALLED_APPS = [
     'config.mongo_apps.MongoAdminConfig',
@@ -76,10 +80,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_backend',
-        'NAME': 'logverse_db',
-        'CLIENT': {
-            'host': 'mongodb://localhost:27017/',
-        },
+        'NAME': MONGO_DB_NAME,
+        # Define HOST and PORT at the top level so Django's core ORM recognizes them
+        'HOST': MONGO_HOST, 
+        'PORT': int(MONGO_PORT),
     }
 }
 

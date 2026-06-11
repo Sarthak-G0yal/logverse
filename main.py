@@ -1,9 +1,10 @@
+import os
 import json
 import random
 import time
 import requests
 
-API_URL = "http://localhost:8000/api/v1/mock-log/"
+API_URL = os.getenv("INGESTION_API_URL", "http://127.0.0.1:8000/api/v1/mock-log/")
 
 SERVICES = ["auth-service", "payment-gateway", "frontend-router", "user-profile-api", "inventory-v2"]
 METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"]
