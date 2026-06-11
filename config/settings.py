@@ -24,7 +24,7 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 # Allow all hosts during development, can be restricted in production
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 # MongoDB Connection Settings
-MONGO_HOST = os.getenv('MONGO_HOST', 'host.docker.internal')
+MONGO_HOST = os.getenv('MONGO_HOST', 'localhost')
 MONGO_PORT = os.getenv('MONGO_PORT', '27017')
 MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'logverse_db')
 MONGO_USER = os.getenv('MONGO_USER', '')
@@ -127,7 +127,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
 
-MIGRATIONS_MODULES = {
+MIGRATION_MODULES = {
     'admin': 'mongo_migrations.admin',
     'auth': 'mongo_migrations.auth',
     'contenttypes': 'mongo_migrations.contenttypes',

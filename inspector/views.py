@@ -1,3 +1,4 @@
+import os
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,6 +9,10 @@ from .models import TrafficLog
 @csrf_exempt # Bypass CSRF for API endpoint because this is a machine-to-machine communication
 def ingest_log(request):
     if request.method == 'POST':
+        expected_token = os.getenv('API_INGESTION_TOKEN')
+        auth_header = request.headers.get('Authorization', '')
+        if expected_token and auth_header != f'Bearer {expected_token}':
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
         try:
             data = json.loads(request.body)
             log_entry = TrafficLog.objects.create(

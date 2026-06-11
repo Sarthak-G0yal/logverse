@@ -1,0 +1,43 @@
+# vector.yaml
+sources:
+  traefik_file:
+    type: "file"
+    include:
+      - "/var/log/traefik/access.json"
+    read_from: "end"
+    fingerprint:
+      strategy: "device_and_inode"
+
+transforms:
+  transform_logs:
+    type: "remap"
+    inputs: ["traefik_file"]
+    source: |
+      # Parse the incoming raw line as JSON safely
+      . = parse_json!(.message)
+
+      # Transform Traefik keys into what Django models expect
+      .service_name = .RouterName || "unrouted-traffic"
+      .method = .RequestMethod
+      .path = .RequestPath
+      .status_code = .DownstreamStatus
+      .remote_ip = .ClientAddr
+
+      # FIX: Infallibly convert Duration to a float before dividing
+      duration_ns = to_float(.Duration) ?? 0.0
+      .execution_duration = duration_ns / 1000000.0
+
+      # Put the original unmodified map inside the payload field
+      .payload = .
+
+sinks:
+  django_api:
+    type: "http"
+    inputs: ["transform_logs"]
+    uri: "http://web:8000/api/v1/mock-log/"
+    method: "post"
+    encoding:
+      codec: "json"
+    request:
+      headers:
+        Authorization: "Bearer sandbox-token-secret-123"
