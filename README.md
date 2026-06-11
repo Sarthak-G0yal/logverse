@@ -78,8 +78,10 @@ docker compose exec web uv run python manage.py migrate
 docker compose exec web uv run python manage.py createsuperuser
 ```
 
-The LogVerse Admin panel will now be accessible at `http://127.0.0.1:8000/admin/`.
-Also the traefik dashboard can be accessed at `http://127.0.0.1:8080/dashboard/`.
+**Dashboard Access:**
+
+- The LogVerse Admin panel will now be accessible at: `http://127.0.0.1:8000/admin/`
+- The Traefik routing dashboard can be accessed at: `http://127.0.0.1:8080/dashboard/`
 
 ---
 

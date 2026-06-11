@@ -14,20 +14,31 @@ def ingest_log(request):
         if expected_token and auth_header != f'Bearer {expected_token}':
             return JsonResponse({'error': 'Unauthorized'}, status=401)
         try:
-            data = json.loads(request.body)
-            log_entry = TrafficLog.objects.create(
-                service_name=data.get('service_name', 'unknown-service'),
-                method=data.get('method', 'UNKNOWN'),
-                path=data.get('path', '/'),
-                status_code=data.get('status_code', 200),
-                remote_ip=data.get('remote_ip'),
-                execution_duration=data.get('execution_duration'),
-                payload=data
+            raw_data = json.loads(request.body)
 
-            )
-            return JsonResponse({'status': 'success', 'log_id': str(log_entry.id)}, status=201)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+            if isinstance(raw_data,dict):
+                logs_to_process = [raw_data]
+            elif isinstance(raw_data,list):
+                logs_to_process = raw_data
+            else:
+                return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+            
+            saved_ids = []
+            for data in logs_to_process:
+                log_entry = TrafficLog.objects.create(
+                    service_name=data.get('service_name', 'UNKNOWN'),
+                    method=data.get('method', 'UNKNOWN'),
+                    path=data.get('path', '/'),
+                    status_code=data.get('status_code', 0),
+                    remote_ip=data.get('remote_ip', ''),
+                    execution_duration=data.get('execution_duration', 0.0),
+                    payload=data.get('payload', {})
+                )
+                saved_ids.append(str(log_entry.id))
+            
+            return JsonResponse({'status': 'success', 'count': len(saved_ids), 'ids': saved_ids}, status=201)
+
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
