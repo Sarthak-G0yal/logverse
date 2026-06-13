@@ -106,3 +106,8 @@ uv run python main.py
 ```
 
 _Refresh your Django Admin panel to see the data instantly indexed in MongoDB._
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
+
