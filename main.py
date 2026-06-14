@@ -4,7 +4,8 @@ import random
 import time
 import requests
 
-API_URL = os.getenv("INGESTION_API_URL", "http://127.0.0.1:8000/api/v1/mock-log/")
+API_URL = os.getenv("INGESTION_API_URL", "http://localhost:8000/api/v1/mock-log/")
+API_TOKEN = os.getenv("API_INGESTION_TOKEN", "super-secure-homelab-token-123")
 
 SERVICES = ["auth-service", "payment-gateway", "frontend-router", "user-profile-api", "inventory-v2"]
 METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"]
@@ -48,8 +49,9 @@ def fire_traffic(count=50):
     success_count = 0
     for i in range(1,count+1):
         log_data = generate_mock_log()
+        headers = {"Authorization": f"Bearer {API_TOKEN}"} if API_TOKEN else {}
         try:
-            response = requests.post(API_URL, json=log_data,timeout=5)
+            response = requests.post(API_URL, json=log_data, headers=headers, timeout=5)
             if response.status_code == 201:
                 success_count += 1
                 print(f"[{i}/{count}] Status {log_data['status_code']} -> Sent successfully to Mongo.")
@@ -59,7 +61,7 @@ def fire_traffic(count=50):
             print(f"❌ [{i}/{count}] Connection error. Is the server running?")
             break
         time.sleep(random.uniform(0.05, 0.2))
-        print(f"Finished firing traffic. Successfully sent {success_count}/{count} logs.")
+    print(f"Finished firing traffic. Successfully sent {success_count}/{count} logs.")
 
 if __name__ == "__main__":
     fire_traffic(100)

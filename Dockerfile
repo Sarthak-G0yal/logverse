@@ -17,6 +17,9 @@ RUN uv sync --frozen
 # Copy the rest of your application code into the container
 COPY . .
 
+# Collect static files
+RUN uv run python manage.py collectstatic --noinput
+
 # Expose Django's default port
 EXPOSE 8000
 
